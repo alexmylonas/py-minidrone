@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin python
 
 import time
 import pexpect
@@ -71,7 +71,8 @@ class WriterThread(StoppableThread):
     def __init__(self, drone):
         StoppableThread.__init__(self)
         self.drone = drone
-        self.gatt = pexpect.spawn(drone.gatttool_path + ' -b ' + drone.mac + ' -I -t random', echo=False)
+        # Error on runtime
+        self.gatt = pexpect.spawn(drone.gatttool_path + ' -b ' + drone.mac + ' -I -t random')
         self.t_reader = ReaderThread(drone, self.gatt)
         self.t_reader.daemon = True
 
@@ -125,6 +126,8 @@ class MiniDrone(object):
         # check pexpect
 
         # check BlueZ
+        # gatttool path
+        #self.gatttool_path = "/usr/local/bluez5/attrib/gatttool"
         self.gatttool_path = pexpect.which('gatttool')
         if not self.gatttool_path:
             return "Please install the BlueZ stack: 'apt-get install bluez'"
@@ -133,7 +136,7 @@ class MiniDrone(object):
         if not self.mac:
             if os.geteuid() != 0:
                 return "Drone MAC missing. Init with 'mac=' or run as root to scan."
-            lescan = pexpect.spawn("hcitool lescan", echo=False)
+            lescan = pexpect.spawn("hcitool lescan")
             index = lescan.expect(P_OUIS, timeout=5)
             if index != 0:
                 return "Couldn't find any drones nearby."
